@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'NeuraPal',
   webDir: 'www',
   server: {
-    url: 'https://neurapal.mentiumlabs.com/dashboard.php',
+    url: 'https://neurapal.mentiumlabs.com/',
     cleartext: false
   },
   ios: {
