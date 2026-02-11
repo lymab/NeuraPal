@@ -12,6 +12,8 @@ workflows:
       vars:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+        BUNDLE_ID: "com.mentiumlabs.neurapal"
+        APP_NAME: "NeuraPal"
       node: 18
       xcode: latest
     scripts:
@@ -25,9 +27,35 @@ workflows:
         script: |
           cd ios/App
           xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
+      - name: Register Bundle ID on Apple Developer Portal
+        script: |
+          app-store-connect bundle-ids create \
+            --identifier $BUNDLE_ID \
+            --name "$APP_NAME" \
+            --platform IOS \
+            2>/dev/null || echo "Bundle ID already exists, continuing..."
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files $BUNDLE_ID \
+            --type IOS_APP_STORE \
+            --create
       - name: Set up code signing
         script: |
+          keychain initialize
+          app-store-connect certificates list \
+            --type IOS_DISTRIBUTION \
+            --save || \
+          app-store-connect certificates create \
+            --type IOS_DISTRIBUTION \
+            --save
+          keychain add-certificates
           xcode-project use-profiles
+      - name: Set build version
+        script: |
+          LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" 2>/dev/null || echo "0")
+          agvtool new-version -all $(($LATEST_BUILD + 1))
+          agvtool new-marketing-version 1.0.0
+        working_directory: ios/App
       - name: Build iOS
         script: |
           xcode-project build-ipa \
@@ -36,6 +64,7 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - ios/App/*.log
     publishing:
       app_store_connect:
         auth: integration
