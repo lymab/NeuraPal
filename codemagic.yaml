@@ -24,30 +24,16 @@ workflows:
         script: |
           cd ios/App
           xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
-      - name: Initialize keychain
+      - name: Set up signing
         script: |
           keychain initialize
-      - name: Create Bundle ID if needed
-        script: |
           app-store-connect bundle-ids create \
             --identifier "$BUNDLE_ID" \
             --name "$APP_NAME" \
             --platform IOS || true
-      - name: Create or fetch certificate
-        script: |
-          app-store-connect certificates list \
-            --type IOS_DISTRIBUTION \
-            --save || \
-          app-store-connect certificates create \
-            --type IOS_DISTRIBUTION \
-            --save
-      - name: Fetch or create provisioning profile
-        script: |
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
-      - name: Set up code signing
-        script: |
           keychain add-certificates
           xcode-project use-profiles
       - name: Set build version
