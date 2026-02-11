@@ -9,43 +9,98 @@ workflows:
       groups:
         - code_signing
       vars:
-        XCODE_PROJECT: "ios/App/App.xcodeproj"
-        XCODE_SCHEME: "App"
         BUNDLE_ID: "com.mentiumlabs.neurapal"
       node: 22
       xcode: latest
     scripts:
       - name: Install dependencies
-        script: |
-          npm install
-      - name: Update Capacitor iOS
-        script: |
-          npx cap sync ios
+        script: npm install
+      - name: Capacitor sync
+        script: npx cap sync ios
       - name: Resolve Swift packages
         script: |
           cd ios/App
           xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
-      - name: Fetch signing files
+      - name: Fetch signing files and set up keychain
         script: |
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
           keychain add-certificates
-          xcode-project use-profiles
+      - name: Extract profile info
+        script: |
+          PROFILE_PATH=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
+          echo "Profile path: $PROFILE_PATH"
+          if [ -z "$PROFILE_PATH" ]; then
+            echo "ERROR: No provisioning profile found"
+            exit 1
+          fi
+          DECODED=$(/usr/bin/security cms -D -i "$PROFILE_PATH")
+          PROFILE_UUID=$(echo "$DECODED" | /usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin)
+          TEAM_ID=$(echo "$DECODED" | /usr/libexec/PlistBuddy -c "Print TeamIdentifier:0" /dev/stdin)
+          PROFILE_NAME=$(echo "$DECODED" | /usr/libexec/PlistBuddy -c "Print Name" /dev/stdin)
+          echo "UUID=$PROFILE_UUID  TEAM=$TEAM_ID  NAME=$PROFILE_NAME"
+          echo "PROFILE_UUID=$PROFILE_UUID" >> $CM_ENV
+          echo "TEAM_ID=$TEAM_ID" >> $CM_ENV
+          echo "PROFILE_NAME=$PROFILE_NAME" >> $CM_ENV
+      - name: Patch Xcode project signing
+        script: |
+          PBXPROJ="ios/App/App.xcodeproj/project.pbxproj"
+          # Replace Automatic with Manual everywhere
+          sed -i '' 's/ProvisioningStyle = Automatic/ProvisioningStyle = Manual/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' "$PBXPROJ"
+          # Add signing settings to EVERY build configuration that has PRODUCT_BUNDLE_IDENTIFIER
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.neurapal;/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.neurapal;\n\t\t\t\tDEVELOPMENT_TEAM = $TEAM_ID;\n\t\t\t\tCODE_SIGN_IDENTITY = \"iPhone Distribution\";\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";/g" "$PBXPROJ"
+          echo "=== Verify signing in pbxproj ==="
+          grep -B2 -A8 "PRODUCT_BUNDLE_IDENTIFIER" "$PBXPROJ"
       - name: Set build version
         script: |
+          cd ios/App
           agvtool new-version -all 1
           agvtool new-marketing-version 1.0.0
-        working_directory: ios/App
-      - name: Build iOS
+      - name: Archive
         script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          xcodebuild \
+            -project "ios/App/App.xcodeproj" \
+            -scheme "App" \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
+            archive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            COMPILER_INDEX_STORE_ENABLE=NO
+      - name: Export IPA
+        script: |
+          cat > /tmp/exportOptions.plist << 'PLISTEOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.mentiumlabs.neurapal</key>
+              <string>PROFILE_NAME_PLACEHOLDER</string>
+            </dict>
+          </dict>
+          </plist>
+          PLISTEOF
+          sed -i '' "s/PROFILE_NAME_PLACEHOLDER/$PROFILE_NAME/" /tmp/exportOptions.plist
+          xcodebuild -exportArchive \
+            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
+            -exportOptionsPlist /tmp/exportOptions.plist \
+            -exportPath build/ios/ipa
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - "*.xcarchive"
     publishing:
       app_store_connect:
         auth: integration
