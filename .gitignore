@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+*.log
+ios/App/Pods/
+ios/App/App/public/
+ios/App/output/
+build/
+*.ipa

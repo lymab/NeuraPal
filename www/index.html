@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>NeuraPal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body,html{width:100%;height:100%;overflow:hidden;background:#1B2A4A}
+iframe{width:100%;height:100%;border:none}
+.splash{position:fixed;inset:0;background:#1B2A4A;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:100;transition:opacity .4s}
+.splash.hide{opacity:0;pointer-events:none}
+.splash h1{font-family:-apple-system,sans-serif;font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-.02em}
+.splash h1 span{color:#3B82F6}
+.splash p{color:rgba(255,255,255,.5);font-size:.85rem;margin-top:.5rem;font-family:-apple-system,sans-serif}
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+    <h1>Neura<span>Pal</span></h1>
+    <p>Loading your health butler...</p>
+</div>
+<script>
+// Redirect to the live PWA — Capacitor wraps this in a native WebView
+window.location.href = 'https://neurapal.mentiumlabs.com/dashboard.php';
+</script>
+</body>
+</html>
