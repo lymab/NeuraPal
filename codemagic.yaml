@@ -8,9 +8,6 @@ workflows:
     environment:
       groups:
         - code_signing
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.mentiumlabs.neurapal
       vars:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
@@ -28,8 +25,13 @@ workflows:
         script: |
           cd ios/App
           xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
-      - name: Set up code signing
+      - name: Fetch signing files
         script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
           xcode-project use-profiles
       - name: Set build version
         script: |
