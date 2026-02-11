@@ -35,24 +35,37 @@ workflows:
             --type IOS_APP_STORE \
             --create
           keychain add-certificates
-          # Debug: list what profiles were installed
-          echo "=== Installed profiles ==="
-          ls ~/Library/MobileDevice/Provisioning\ Profiles/ || true
-          # Get the profile UUID
+          # Get profile info
           PROFILE_PATH=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
           if [ -n "$PROFILE_PATH" ]; then
-            PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 UUID | grep string | sed 's/.*<string>//' | sed 's/<\/string>.*//')
-            TEAM_ID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 TeamIdentifier -m1 | tail -1 | sed 's/.*<string>//' | sed 's/<\/string>.*//')
-            PROFILE_NAME=$(security cms -D -i "$PROFILE_PATH" | grep -A1 "Name" -m1 | tail -1 | sed 's/.*<string>//' | sed 's/<\/string>.*//')
+            PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(/usr/bin/security cms -D -i "$PROFILE_PATH"))
+            TEAM_ID=$(/usr/libexec/PlistBuddy -c "Print TeamIdentifier:0" /dev/stdin <<< $(/usr/bin/security cms -D -i "$PROFILE_PATH"))
+            PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< $(/usr/bin/security cms -D -i "$PROFILE_PATH"))
             echo "Profile UUID: $PROFILE_UUID"
             echo "Team ID: $TEAM_ID"
             echo "Profile Name: $PROFILE_NAME"
-            # Export for later steps
             echo "PROFILE_UUID=$PROFILE_UUID" >> $CM_ENV
             echo "TEAM_ID=$TEAM_ID" >> $CM_ENV
             echo "PROFILE_NAME=$PROFILE_NAME" >> $CM_ENV
+          else
+            echo "ERROR: No provisioning profile found!"
+            exit 1
           fi
-          xcode-project use-profiles
+      - name: Patch Xcode project for manual signing
+        script: |
+          PBXPROJ="ios/App/App.xcodeproj/project.pbxproj"
+          # Force manual signing everywhere
+          sed -i '' 's/ProvisioningStyle = Automatic/ProvisioningStyle = Manual/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' "$PBXPROJ"
+          # Inject DEVELOPMENT_TEAM and PROVISIONING_PROFILE into Release config
+          sed -i '' "/CODE_SIGN_STYLE = Manual;/{
+            a\\
+            \				CODE_SIGN_IDENTITY = \"iPhone Distribution\";\\
+            \				DEVELOPMENT_TEAM = $TEAM_ID;\\
+            \				\"PROVISIONING_PROFILE[sdk=iphoneos*]\" = \"$PROFILE_UUID\";
+          }" "$PBXPROJ"
+          echo "=== Patched pbxproj signing settings ==="
+          grep -A5 "CODE_SIGN_STYLE" "$PBXPROJ"
       - name: Set build version
         script: |
           LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo "0")
@@ -70,11 +83,11 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            "PROVISIONING_PROFILE=$PROFILE_UUID" \
             COMPILER_INDEX_STORE_ENABLE=NO
       - name: Export IPA
         script: |
-          cat > exportOptions.plist <<EOF
+          cat > exportOptions.plist << HEREDOC
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -82,17 +95,17 @@ workflows:
             <key>method</key>
             <string>app-store</string>
             <key>teamID</key>
-            <string>$TEAM_ID</string>
+            <string>${TEAM_ID}</string>
             <key>signingStyle</key>
             <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
               <key>com.mentiumlabs.neurapal</key>
-              <string>$PROFILE_NAME</string>
+              <string>${PROFILE_UUID}</string>
             </dict>
           </dict>
           </plist>
-          EOF
+          HEREDOC
           xcodebuild -exportArchive \
             -archivePath build/ios/xcarchive/App.xcarchive \
             -exportOptionsPlist exportOptions.plist \
