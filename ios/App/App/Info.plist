@@ -35,8 +35,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -53,6 +51,10 @@
 	<string>NeuraPal needs camera access to analyze your meal photos for nutrition tracking.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>NeuraPal needs photo library access to select meal photos for nutrition analysis.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>NeuraPal uses the microphone for voice input so you can talk to your AI health butler.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>NeuraPal uses speech recognition to convert your voice into text messages.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

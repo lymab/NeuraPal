@@ -6,23 +6,142 @@
 <title>NeuraPal</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body,html{width:100%;height:100%;overflow:hidden;background:#1B2A4A}
-iframe{width:100%;height:100%;border:none}
-.splash{position:fixed;inset:0;background:#1B2A4A;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:100;transition:opacity .4s}
-.splash.hide{opacity:0;pointer-events:none}
-.splash h1{font-family:-apple-system,sans-serif;font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-.02em}
-.splash h1 span{color:#3B82F6}
-.splash p{color:rgba(255,255,255,.5);font-size:.85rem;margin-top:.5rem;font-family:-apple-system,sans-serif}
+body,html{width:100%;height:100%;overflow:hidden;background:#1B2A4A;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif}
+.shell{position:fixed;inset:0;background:#1B2A4A;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:100;transition:opacity .4s}
+.shell.hide{opacity:0;pointer-events:none}
+.logo{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.02em}
+.logo span{color:#3B82F6}
+.subtitle{color:rgba(255,255,255,.5);font-size:.85rem;margin-top:.5rem}
+.spinner{margin-top:1.5rem;width:28px;height:28px;border:3px solid rgba(255,255,255,.15);border-top-color:#3B82F6;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.offline{display:none;text-align:center;margin-top:2rem;max-width:300px}
+.offline.show{display:block}
+.offline p{color:rgba(255,255,255,.6);font-size:.85rem;line-height:1.6;margin-bottom:1.25rem}
+.offline button{background:#3B82F6;color:#fff;border:none;padding:.75rem 2rem;border-radius:999px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;transition:all .2s}
+.offline button:active{transform:scale(.96);opacity:.8}
+.status{color:rgba(255,255,255,.35);font-size:.7rem;margin-top:1rem;position:absolute;bottom:calc(2rem + env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
-<div class="splash" id="splash">
-    <h1>Neura<span>Pal</span></h1>
-    <p>Loading your health butler...</p>
+<div class="shell" id="shell">
+    <div class="logo">Neura<span>Pal</span></div>
+    <div class="subtitle">Your AI Health Butler</div>
+    <div class="spinner" id="spinner"></div>
+    <div class="offline" id="offline">
+        <p>Can't connect right now. Check your internet connection and try again.</p>
+        <button onclick="tryConnect()">Try Again</button>
+    </div>
+    <div class="status" id="status">Connecting...</div>
 </div>
-<script>
-// Redirect to the live PWA — Capacitor wraps this in a native WebView
-window.location.href = 'https://neurapal.mentiumlabs.com/';
+
+<script type="module">
+import { Capacitor } from '@capacitor/core';
+
+// Initialize native plugins
+async function initNative() {
+    try {
+        // Status Bar — light content on dark background
+        const { StatusBar, Style } = await import('@capacitor/status-bar');
+        await StatusBar.setStyle({ style: Style.Dark });
+        await StatusBar.setBackgroundColor({ color: '#1B2A4A' });
+    } catch(e) {}
+
+    try {
+        // Keyboard — adjust scroll on show/hide
+        const { Keyboard } = await import('@capacitor/keyboard');
+        Keyboard.setAccessoryBarVisible({ isVisible: true });
+        Keyboard.setScroll({ isDisabled: false });
+    } catch(e) {}
+
+    try {
+        // App — handle back button and URL opens
+        const { App } = await import('@capacitor/app');
+        App.addListener('backButton', () => {
+            if (window.history.length > 1) {
+                window.history.back();
+            }
+        });
+        // Handle deep links
+        App.addListener('appUrlOpen', (data) => {
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        });
+    } catch(e) {}
+}
+
+// Connectivity check with timeout
+function checkConnection(timeout = 8000) {
+    return new Promise((resolve) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => { controller.abort(); resolve(false); }, timeout);
+        fetch('https://neurapal.mentiumlabs.com/favicon.png', {
+            method: 'HEAD',
+            mode: 'no-cors',
+            signal: controller.signal,
+            cache: 'no-store'
+        })
+        .then(() => { clearTimeout(timer); resolve(true); })
+        .catch(() => { clearTimeout(timer); resolve(false); });
+    });
+}
+
+async function boot() {
+    const status = document.getElementById('status');
+    const spinner = document.getElementById('spinner');
+    const offline = document.getElementById('offline');
+
+    // Init native features first
+    status.textContent = 'Initializing...';
+    await initNative();
+
+    // Check connectivity
+    status.textContent = 'Connecting...';
+    const online = await checkConnection();
+
+    if (online) {
+        status.textContent = 'Loading NeuraPal...';
+        // Small delay so splash feels intentional, not a flash
+        setTimeout(() => {
+            window.location.href = 'https://neurapal.mentiumlabs.com/';
+        }, 300);
+    } else {
+        // Show offline UI
+        spinner.style.display = 'none';
+        offline.classList.add('show');
+        status.textContent = 'No connection';
+    }
+}
+
+// Retry connection
+window.tryConnect = async function() {
+    const spinner = document.getElementById('spinner');
+    const offline = document.getElementById('offline');
+    const status = document.getElementById('status');
+    spinner.style.display = 'block';
+    offline.classList.remove('show');
+    status.textContent = 'Retrying...';
+
+    // Haptic feedback on retry
+    try {
+        const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+        await Haptics.impact({ style: ImpactStyle.Light });
+    } catch(e) {}
+
+    const online = await checkConnection();
+    if (online) {
+        status.textContent = 'Connected!';
+        setTimeout(() => {
+            window.location.href = 'https://neurapal.mentiumlabs.com/';
+        }, 200);
+    } else {
+        spinner.style.display = 'none';
+        offline.classList.add('show');
+        status.textContent = 'Still offline';
+    }
+};
+
+boot();
 </script>
 </body>
 </html>

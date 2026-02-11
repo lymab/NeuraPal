@@ -6,21 +6,37 @@ const config: CapacitorConfig = {
   webDir: 'www',
   server: {
     url: 'https://neurapal.mentiumlabs.com/',
-    cleartext: false
+    cleartext: false,
+    allowNavigation: [
+      'neurapal.mentiumlabs.com',
+      'accounts.google.com',
+      '*.google.com'
+    ]
   },
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
     scheme: 'NeuraPal',
-    backgroundColor: '#1B2A4A'
+    backgroundColor: '#1B2A4A',
+    allowsLinkPreview: false,
+    scrollEnabled: true
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 1500,
       launchAutoHide: true,
       backgroundColor: '#1B2A4A',
       showSpinner: false,
-      launchFadeOutDuration: 400
+      launchFadeOutDuration: 300
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#1B2A4A',
+      overlaysWebView: false
+    },
+    Keyboard: {
+      resize: 'body',
+      resizeOnFullScreen: true
     }
   }
 };
