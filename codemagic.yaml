@@ -11,7 +11,7 @@ workflows:
         XCODE_SCHEME: "App"
         BUNDLE_ID: "com.mentiumlabs.neurapal"
         APP_NAME: "NeuraPal"
-      node: 20
+      node: 22
       xcode: latest
     scripts:
       - name: Install dependencies
