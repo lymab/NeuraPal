@@ -34,114 +34,89 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1B2A4A;font-family:
     <div class="status" id="status">Connecting...</div>
 </div>
 
-<script type="module">
-import { Capacitor } from '@capacitor/core';
-
-// Initialize native plugins
-async function initNative() {
-    try {
-        // Status Bar — light content on dark background
-        const { StatusBar, Style } = await import('@capacitor/status-bar');
-        await StatusBar.setStyle({ style: Style.Dark });
-        await StatusBar.setBackgroundColor({ color: '#1B2A4A' });
-    } catch(e) {}
-
-    try {
-        // Keyboard — adjust scroll on show/hide
-        const { Keyboard } = await import('@capacitor/keyboard');
-        Keyboard.setAccessoryBarVisible({ isVisible: true });
-        Keyboard.setScroll({ isDisabled: false });
-    } catch(e) {}
-
-    try {
-        // App — handle back button and URL opens
-        const { App } = await import('@capacitor/app');
-        App.addListener('backButton', () => {
-            if (window.history.length > 1) {
-                window.history.back();
-            }
-        });
-        // Handle deep links
-        App.addListener('appUrlOpen', (data) => {
-            if (data.url) {
-                window.location.href = data.url;
-            }
-        });
-    } catch(e) {}
+<script>
+// Use Capacitor's injected bridge directly — no bundler needed
+function initNative() {
+    if (!window.Capacitor || !window.Capacitor.Plugins) return;
+    var P = window.Capacitor.Plugins;
+    try { if (P.StatusBar) P.StatusBar.setStyle({ style: 'DARK' }); } catch(e) {}
+    try { if (P.SplashScreen) P.SplashScreen.hide(); } catch(e) {}
 }
 
-// Connectivity check with timeout
-function checkConnection(timeout = 8000) {
-    return new Promise((resolve) => {
-        const controller = new AbortController();
-        const timer = setTimeout(() => { controller.abort(); resolve(false); }, timeout);
+function checkConnection(timeout) {
+    timeout = timeout || 8000;
+    return new Promise(function(resolve) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); resolve(false); }, timeout);
         fetch('https://neurapal.mentiumlabs.com/favicon.png', {
             method: 'HEAD',
             mode: 'no-cors',
             signal: controller.signal,
             cache: 'no-store'
         })
-        .then(() => { clearTimeout(timer); resolve(true); })
-        .catch(() => { clearTimeout(timer); resolve(false); });
+        .then(function() { clearTimeout(timer); resolve(true); })
+        .catch(function() { clearTimeout(timer); resolve(false); });
     });
 }
 
-async function boot() {
-    const status = document.getElementById('status');
-    const spinner = document.getElementById('spinner');
-    const offline = document.getElementById('offline');
+function boot() {
+    var status = document.getElementById('status');
+    var spinner = document.getElementById('spinner');
+    var offline = document.getElementById('offline');
 
-    // Init native features first
     status.textContent = 'Initializing...';
-    await initNative();
+    initNative();
 
-    // Check connectivity
     status.textContent = 'Connecting...';
-    const online = await checkConnection();
-
-    if (online) {
-        status.textContent = 'Loading NeuraPal...';
-        // Small delay so splash feels intentional, not a flash
-        setTimeout(() => {
-            window.location.href = 'https://neurapal.mentiumlabs.com/';
-        }, 300);
-    } else {
-        // Show offline UI
-        spinner.style.display = 'none';
-        offline.classList.add('show');
-        status.textContent = 'No connection';
-    }
+    checkConnection().then(function(online) {
+        if (online) {
+            status.textContent = 'Loading NeuraPal...';
+            setTimeout(function() {
+                window.location.href = 'https://neurapal.mentiumlabs.com/';
+            }, 300);
+        } else {
+            spinner.style.display = 'none';
+            offline.classList.add('show');
+            status.textContent = 'No connection';
+        }
+    });
 }
 
-// Retry connection
-window.tryConnect = async function() {
-    const spinner = document.getElementById('spinner');
-    const offline = document.getElementById('offline');
-    const status = document.getElementById('status');
+function tryConnect() {
+    var spinner = document.getElementById('spinner');
+    var offline = document.getElementById('offline');
+    var status = document.getElementById('status');
     spinner.style.display = 'block';
     offline.classList.remove('show');
     status.textContent = 'Retrying...';
 
     // Haptic feedback on retry
     try {
-        const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-        await Haptics.impact({ style: ImpactStyle.Light });
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+            window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' });
+        }
     } catch(e) {}
 
-    const online = await checkConnection();
-    if (online) {
-        status.textContent = 'Connected!';
-        setTimeout(() => {
-            window.location.href = 'https://neurapal.mentiumlabs.com/';
-        }, 200);
-    } else {
-        spinner.style.display = 'none';
-        offline.classList.add('show');
-        status.textContent = 'Still offline';
-    }
-};
+    checkConnection().then(function(online) {
+        if (online) {
+            status.textContent = 'Connected!';
+            setTimeout(function() {
+                window.location.href = 'https://neurapal.mentiumlabs.com/';
+            }, 200);
+        } else {
+            spinner.style.display = 'none';
+            offline.classList.add('show');
+            status.textContent = 'Still offline';
+        }
+    });
+}
 
-boot();
+// Wait for Capacitor bridge to be ready, then boot
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(boot, 50);
+} else {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(boot, 50); });
+}
 </script>
 </body>
 </html>
