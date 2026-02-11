@@ -11,7 +11,9 @@ const config: CapacitorConfig = {
     allowNavigation: [
       'neurapal.mentiumlabs.com',
       'accounts.google.com',
-      '*.google.com'
+      '*.google.com',
+      'appleid.apple.com',
+      '*.apple.com'
     ]
   },
   ios: {
