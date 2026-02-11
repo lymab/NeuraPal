@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.mentiumlabs.neurapal',
   appName: 'NeuraPal',
   webDir: 'www',
+  appendUserAgent: 'Capacitor NeuraPal',
   server: {
     url: 'https://neurapal.mentiumlabs.com/',
     cleartext: false,
