@@ -1,15 +1,15 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.mentiumlabs.neurapal',
-  appName: 'NeuraPal',
+  appId: 'com.mentiumlabs.sadiky',
+  appName: 'Sadiky',
   webDir: 'www',
-  appendUserAgent: 'Capacitor NeuraPal',
+  appendUserAgent: 'Capacitor Sadiky',
   server: {
-    url: 'https://neurapal.mentiumlabs.com/',
+    url: 'https://sadiky.com/',
     cleartext: false,
     allowNavigation: [
-      'neurapal.mentiumlabs.com',
+      'sadiky.com',
       'accounts.google.com',
       '*.google.com',
       'appleid.apple.com',
@@ -19,7 +19,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
-    scheme: 'NeuraPal',
+    scheme: 'Sadiky',
     backgroundColor: '#1B2A4A',
     allowsLinkPreview: false,
     scrollEnabled: true

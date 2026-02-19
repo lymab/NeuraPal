@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>NeuraPal</title>
+<title>Sadiky</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body,html{width:100%;height:100%;overflow:hidden;background:#1B2A4A;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif}
@@ -48,7 +48,7 @@ function checkConnection(timeout) {
     return new Promise(function(resolve) {
         var controller = new AbortController();
         var timer = setTimeout(function() { controller.abort(); resolve(false); }, timeout);
-        fetch('https://neurapal.mentiumlabs.com/favicon.png', {
+        fetch('https://sadiky.com/favicon.png', {
             method: 'HEAD',
             mode: 'no-cors',
             signal: controller.signal,
@@ -70,9 +70,9 @@ function boot() {
     status.textContent = 'Connecting...';
     checkConnection().then(function(online) {
         if (online) {
-            status.textContent = 'Loading NeuraPal...';
+            status.textContent = 'Loading Sadiky...';
             setTimeout(function() {
-                window.location.href = 'https://neurapal.mentiumlabs.com/';
+                window.location.href = 'https://sadiky.com/';
             }, 300);
         } else {
             spinner.style.display = 'none';
@@ -101,7 +101,7 @@ function tryConnect() {
         if (online) {
             status.textContent = 'Connected!';
             setTimeout(function() {
-                window.location.href = 'https://neurapal.mentiumlabs.com/';
+                window.location.href = 'https://sadiky.com/';
             }, 200);
         } else {
             spinner.style.display = 'none';

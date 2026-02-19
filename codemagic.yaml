@@ -1,6 +1,6 @@
 workflows:
   ios-release:
-    name: NeuraPal iOS Release
+    name: Sadiky iOS Release
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
@@ -9,7 +9,7 @@ workflows:
       groups:
         - code_signing
       vars:
-        BUNDLE_ID: "com.mentiumlabs.neurapal"
+        BUNDLE_ID: "com.mentiumlabs.sadiky"
       node: 22
       xcode: latest
     scripts:
@@ -51,14 +51,14 @@ workflows:
           sed -i '' 's/ProvisioningStyle = Automatic/ProvisioningStyle = Manual/g' "$PBXPROJ"
           sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' "$PBXPROJ"
           # Add signing settings and entitlements to EVERY build configuration that has PRODUCT_BUNDLE_IDENTIFIER
-          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.neurapal;/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.neurapal;\n\t\t\t\tDEVELOPMENT_TEAM = $TEAM_ID;\n\t\t\t\tCODE_SIGN_IDENTITY = \"iPhone Distribution\";\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";\n\t\t\t\tCODE_SIGN_ENTITLEMENTS = App/App.entitlements;/g" "$PBXPROJ"
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.sadiky;/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.sadiky;\n\t\t\t\tDEVELOPMENT_TEAM = $TEAM_ID;\n\t\t\t\tCODE_SIGN_IDENTITY = \"iPhone Distribution\";\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";\n\t\t\t\tCODE_SIGN_ENTITLEMENTS = App/App.entitlements;/g" "$PBXPROJ"
           echo "=== Verify signing in pbxproj ==="
           grep -B2 -A8 "PRODUCT_BUNDLE_IDENTIFIER" "$PBXPROJ"
       - name: Set build version
         script: |
           cd ios/App
-          agvtool new-version -all 4
-          agvtool new-marketing-version 1.1.0
+          agvtool new-version -all 1
+          agvtool new-marketing-version 2.0
       - name: Archive
         script: |
           xcodebuild \
@@ -86,7 +86,7 @@ workflows:
             <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
-              <key>com.mentiumlabs.neurapal</key>
+              <key>com.mentiumlabs.sadiky</key>
               <string>PROFILE_NAME_PLACEHOLDER</string>
             </dict>
           </dict>

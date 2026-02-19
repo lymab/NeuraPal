@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>NeuraPal</string>
+        <string>Sadiky</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -48,13 +48,13 @@
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>
 	<key>NSCameraUsageDescription</key>
-	<string>NeuraPal needs camera access to analyze your meal photos for nutrition tracking.</string>
+	<string>Sadiky needs camera access to analyze your meal photos for nutrition tracking.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>NeuraPal needs photo library access to select meal photos for nutrition analysis.</string>
+	<string>Sadiky needs photo library access to select meal photos for nutrition analysis.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>NeuraPal uses the microphone for voice input so you can talk to your AI health butler.</string>
+	<string>Sadiky uses the microphone for voice input so you can talk to your AI health butler.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>NeuraPal uses speech recognition to convert your voice into text messages.</string>
+	<string>Sadiky uses speech recognition to convert your voice into text messages.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
