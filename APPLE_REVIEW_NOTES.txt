@@ -1,0 +1,89 @@
+App Name: Sadiky
+Version: 1.3 (Build 7)
+Bundle ID: com.mentiumlabs.sadiky
+
+SIGN-IN CREDENTIALS (for App Store Connect review):
+  Email:    reviewer@apple.com
+  Password: Reviewer123
+
+ALTERNATIVE ACCESS:
+  - Tap "Try a Demo" on the login screen for instant access without an account
+  - Sign in with Apple works with any Apple ID
+  - Or create a new account via "Sign Up" on the login screen
+
+WHAT SADIKY DOES:
+Sadiky is a voice-powered AI health companion that helps users track medications,
+analyze meals via photos, monitor daily health metrics from Apple Health, and maintain
+wellness routines through conversational AI. Designed for all ages including elderly
+users — large buttons, voice-first interaction, no typing required.
+
+SUBSCRIPTION:
+- Product: Sadiky Premium Yearly ($19.99/year)
+- Product ID: com.mentiumlabs.sadiky.premium.yearly.v2
+- Free trial: 7 days
+- All purchases go through Apple In-App Purchase (StoreKit 2)
+- Restore Purchases button is available on the subscription page
+- Manage Subscription opens iOS native subscription management
+- Auto-renewal and cancellation terms are displayed before purchase
+
+NATIVE FEATURES (beyond WebView):
+1. Native Speech Recognition — Uses iOS SFSpeechRecognizer for voice input
+   (not available in WKWebView). Tap the microphone button in the chat to test.
+   Supports multiple languages via device locale.
+2. Apple HealthKit Integration — Reads steps, calories, heart rate, sleep, and weight
+   from Apple Health (read-only, no write access). Visible on the dashboard.
+3. StoreKit 2 In-App Purchase — Native subscription handling with Apple IAP.
+4. Sign in with Apple — Redirect-based web authentication with JWT signature
+   verification against Apple's JWKS.
+5. Haptic Feedback — Native haptics on UI interactions.
+
+HOW TO TEST VOICE:
+1. Open the app and sign in (or use Demo mode)
+2. Navigate to Chat (tap "Talk to Sadiky" from the + menu)
+3. Tap the microphone button
+4. Grant microphone and speech recognition permissions when prompted
+5. Speak naturally — transcription appears in real-time
+6. The AI responds to your spoken message
+
+HOW TO TEST MEAL PHOTO:
+1. Tap the + button (center of bottom nav) and select "Snap a Meal"
+2. Take a photo of any meal or select from photo library
+3. The AI analyzes the image and returns calorie/macro estimates
+
+HOW TO TEST ACCOUNT DELETION:
+1. Sign in with any method
+2. Go to Settings (gear icon)
+3. Scroll to Account section
+4. Tap "Delete Account"
+5. Confirm deletion — all server-side data is permanently removed
+
+HEALTH DISCLAIMERS:
+- All health-facing pages display a medical disclaimer above the bottom navigation:
+  "Sadiky provides general wellness information only. Not a substitute for
+  professional medical advice."
+- Terms of Service Section 3: Full medical disclaimer
+- Landing page footer: Comprehensive health disclaimer
+- AI system prompt instructs: "For serious medical symptoms, suggest consulting a doctor"
+
+PRIVACY:
+- Privacy policy: https://sadiky.com/privacy.html
+- Terms of service: https://sadiky.com/terms.html
+- HealthKit data is read-only (toShare: nil)
+- No HealthKit data is shared for advertising or tracking
+- Health data disclosed to OpenAI for wellness suggestions (see privacy policy)
+- App does not track users across apps or websites (ATT not required)
+- Privacy manifest (PrivacyInfo.xcprivacy) declares: Health, Audio, Photos,
+  PurchaseHistory (unlinked), EmailAddress and UserID (linked)
+
+THIRD-PARTY SERVICES:
+- OpenAI API (chat + meal photo analysis) — data not used for model training
+- ElevenLabs (voice conversations) — audio processed real-time, not stored
+- Apple HealthKit (read-only health data)
+- Apple StoreKit 2 (subscriptions)
+
+ACCESSIBILITY:
+- Pinch-to-zoom enabled on all pages
+- Minimum 44pt touch targets on all interactive elements
+- WCAG AA contrast ratios on all text
+- Voice-first design — users can interact entirely by speaking
+- Bluetooth HFP support for hearing aid compatibility

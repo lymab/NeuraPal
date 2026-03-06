@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
       'accounts.google.com',
       '*.google.com',
       'appleid.apple.com',
-      '*.apple.com'
+      '*.apple.com',
     ]
   },
   ios: {

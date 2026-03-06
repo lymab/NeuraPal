@@ -19,9 +19,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>2.0</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -52,10 +52,14 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Sadiky needs photo library access to select meal photos for nutrition analysis.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Sadiky uses the microphone for voice input so you can talk to your AI health butler.</string>
+	<string>Sadiky uses the microphone for voice input so you can talk to your AI health companion.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Sadiky uses speech recognition to convert your voice into text messages.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Sadiky reads Apple Health data (steps, calories, heart rate, sleep, weight) to display your daily wellness summary in the app.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Sadiky does not write to Apple Health. This description is required by the HealthKit framework.</string>
 </dict>
 </plist>
