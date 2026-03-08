@@ -14,4 +14,4 @@ Account deletion is available in Settings > "Delete my account permanently".
 
 Native Features: Sign in with Apple, haptic feedback on all interactions, native status bar and keyboard management, offline connectivity detection with retry UI, voice input via microphone, meal photo capture via camera, app lifecycle management.
 
-NeuraPal provides general wellness information only and is not a substitute for professional medical advice. Medical disclaimers and source citations are displayed throughout the app.
+Sadiky provides general wellness information only and is not a substitute for professional medical advice. Medical disclaimers and source citations are displayed throughout the app.

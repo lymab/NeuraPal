@@ -4,12 +4,12 @@
 
 ## Support URL
 ```
-https://neurapal.mentiumlabs.com/support
+https://sadiky.com/support
 ```
 
 ## Privacy Policy URL
 ```
-https://neurapal.mentiumlabs.com/privacy
+https://sadiky.com/privacy
 ```
 
 ---
@@ -33,7 +33,7 @@ Key screens to review:
 
 Account deletion is available in Settings > "Delete my account permanently".
 
-NeuraPal provides general wellness information only and is not a substitute for professional medical advice. Medical disclaimers and source citations are displayed throughout the app.
+Sadiky provides general wellness information only and is not a substitute for professional medical advice. Medical disclaimers and source citations are displayed throughout the app.
 ```
 
 ---
@@ -43,9 +43,9 @@ NeuraPal provides general wellness information only and is not a substitute for 
 Paste this into the "Description" field:
 
 ```
-NeuraPal — Your AI Health Butler
+Sadiky — Your AI Health Butler
 
-Stay on top of your health routine with NeuraPal, your personal AI-powered wellness assistant. Track medications, analyze meals, plan your day, and build healthier habits — all through a simple chat interface.
+Stay on top of your health routine with Sadiky, your personal AI-powered wellness assistant. Track medications, analyze meals, plan your day, and build healthier habits — all through a simple chat interface.
 
 CORE FEATURES:
 - AI Health Assistant — Chat naturally to manage your entire health routine
@@ -54,14 +54,14 @@ CORE FEATURES:
 - Daily Planning — Get personalized daily schedules based on your routine
 - Water Tracking — Monitor your daily hydration goals
 - Smart Reminders — Never miss a medication, meal, or gym session
-- Voice Input — Talk to NeuraPal using your voice
+- Voice Input — Talk to Sadiky using your voice
 - Adherence History — Track your medication compliance over time
 
 PRIVACY FIRST:
 Your health data is yours. We use third-party AI service providers to power the AI assistant — you'll be asked for explicit consent before any data is shared. We never sell your data or use it for advertising. Delete your account anytime to remove all data.
 
 MEDICAL DISCLAIMER:
-NeuraPal is a wellness companion, not a medical device. It does not provide medical advice, diagnosis, or treatment. All health recommendations include citations from reputable sources (WHO, NIH, USDA, Mayo Clinic). Always consult a qualified healthcare provider before making any medical or health decisions.
+Sadiky is a wellness companion, not a medical device. It does not provide medical advice, diagnosis, or treatment. All health recommendations include citations from reputable sources (WHO, NIH, USDA, Mayo Clinic). Always consult a qualified healthcare provider before making any medical or health decisions.
 ```
 
 ---
@@ -108,7 +108,7 @@ Your AI Health Butler
 If Apple asks about the business model, reply with:
 
 ```
-Thank you for your review. NeuraPal is currently a free app with all features available at no cost. We plan to introduce an optional premium subscription (NeuraPal Pro) in a future update, which will be handled exclusively through Apple's In-App Purchase system. The current version does not include any paid features or subscriptions.
+Thank you for your review. Sadiky is currently a free app with all features available at no cost. We plan to introduce an optional premium subscription (Sadiky Pro) in a future update, which will be handled exclusively through Apple's In-App Purchase system. The current version does not include any paid features or subscriptions.
 ```
 
 ---

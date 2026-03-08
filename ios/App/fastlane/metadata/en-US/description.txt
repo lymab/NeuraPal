@@ -1,6 +1,6 @@
-NeuraPal — Your AI Health Butler
+Sadiky — Your AI Health Butler
 
-Stay on top of your health routine with NeuraPal, your personal AI-powered wellness assistant. Track medications, analyze meals, plan your day, and build healthier habits — all through a simple chat interface.
+Stay on top of your health routine with Sadiky, your personal AI-powered wellness assistant. Track medications, analyze meals, plan your day, and build healthier habits — all through a simple chat interface.
 
 CORE FEATURES:
 - AI Health Assistant — Chat naturally to manage your entire health routine
@@ -9,11 +9,11 @@ CORE FEATURES:
 - Daily Planning — Get personalized daily schedules based on your routine
 - Water Tracking — Monitor your daily hydration goals
 - Smart Reminders — Never miss a medication, meal, or gym session
-- Voice Input — Talk to NeuraPal using your voice
+- Voice Input — Talk to Sadiky using your voice
 - Adherence History — Track your medication compliance over time
 
 PRIVACY FIRST:
 Your health data is yours. We use third-party AI service providers to power the AI assistant — you'll be asked for explicit consent before any data is shared. We never sell your data or use it for advertising. Delete your account anytime to remove all data.
 
 MEDICAL DISCLAIMER:
-NeuraPal is a wellness companion, not a medical device. It does not provide medical advice, diagnosis, or treatment. All health recommendations include citations from reputable sources (WHO, NIH, USDA, Mayo Clinic). Always consult a qualified healthcare provider before making any medical or health decisions. Information provided is for general wellness purposes only.
+Sadiky is a wellness companion, not a medical device. It does not provide medical advice, diagnosis, or treatment. All health recommendations include citations from reputable sources (WHO, NIH, USDA, Mayo Clinic). Always consult a qualified healthcare provider before making any medical or health decisions. Information provided is for general wellness purposes only.

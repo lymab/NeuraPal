@@ -3,12 +3,12 @@
     "apps": [],
     "details": [
       {
-        "appID": "2NRP9NKZAL.com.mentiumlabs.neurapal",
+        "appID": "2NRP9NKZAL.com.mentiumlabs.sadiky",
         "paths": ["*"]
       }
     ]
   },
   "webcredentials": {
-    "apps": ["2NRP9NKZAL.com.mentiumlabs.neurapal"]
+    "apps": ["2NRP9NKZAL.com.mentiumlabs.sadiky"]
   }
 }
