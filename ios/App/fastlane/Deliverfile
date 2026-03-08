@@ -1,0 +1,17 @@
+app_identifier "com.mentiumlabs.neurapal"
+username "lyazidmabrouki@hotmail.fr"
+team_id "2NRP9NKZAL"
+
+# Skip binary upload - we're only uploading metadata and screenshots
+skip_binary_upload true
+
+# Metadata
+force true
+overwrite_screenshots true
+submit_for_review false
+
+# Pricing
+# price_tier 0  # Free
+
+# App Rating (Health & Fitness, contains medical info)
+app_rating_config_path "./fastlane/rating_config.json"

@@ -1,0 +1,17 @@
+Demo Account: Tap "Try Demo Account" on the login screen. No username or password needed.
+
+The app requires an internet connection. On first launch, a privacy consent overlay is displayed explaining what data is shared with third-party AI providers. The user must grant permission before proceeding.
+
+Key screens to review:
+1. Consent overlay (first launch) — data sharing disclosure
+2. Login page — Sign in with Apple, Google, or Demo Account
+3. Chat — AI health assistant conversation
+4. Meals tab — Meal photo analysis with nutrition breakdown
+5. History tab — Medication adherence tracking
+6. Settings — Profile, schedule, data export, and account deletion
+
+Account deletion is available in Settings > "Delete my account permanently".
+
+Native Features: Sign in with Apple, haptic feedback on all interactions, native status bar and keyboard management, offline connectivity detection with retry UI, voice input via microphone, meal photo capture via camera, app lifecycle management.
+
+NeuraPal provides general wellness information only and is not a substitute for professional medical advice. Medical disclaimers and source citations are displayed throughout the app.

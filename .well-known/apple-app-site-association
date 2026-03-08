@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "2NRP9NKZAL.com.mentiumlabs.neurapal",
+        "paths": ["*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["2NRP9NKZAL.com.mentiumlabs.neurapal"]
+  }
+}
