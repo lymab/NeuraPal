@@ -13,7 +13,7 @@
   },
   "subscriptionGroups" : [
     {
-      "id" : "21500001",
+      "id" : "21945240",
       "localizations" : [
         {
           "description" : "Sadiky Premium",
@@ -45,7 +45,7 @@
           "productID" : "com.mentiumlabs.sadiky.premium.yearly.v2",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Sadiky Premium Yearly",
-          "subscriptionGroupID" : "21500001",
+          "subscriptionGroupID" : "21945240",
           "type" : "RecurringSubscription"
         }
       ]
