@@ -1,17 +1,69 @@
 Demo Account: Tap "Try Demo Account" on the login screen. No username or password needed.
 
-The app requires an internet connection. On first launch, a privacy consent overlay is displayed explaining what data is shared with third-party AI providers. The user must grant permission before proceeding.
+The app requires an internet connection. On first launch, a native onboarding flow introduces the app's health tracking, voice, and notification features before loading the main experience.
+
+HOW TO TEST IN-APP PURCHASE (iPad and iPhone):
+1. Open the app → complete the 3-screen onboarding → tap "Get Started"
+2. Sign in using Demo Account (tap "Try Demo Account" on the login screen)
+3. Tap the gear icon (⚙) in the top-right corner of the screen — this is a native floating button always visible on every screen
+4. Tap "Subscribe to Sadiky Premium" (first row, under "Premium" section)
+5. The native StoreKit purchase sheet appears — complete the sandbox purchase
+6. Alternative: After signing in, the web app may also show a "Get Premium" banner; tapping it triggers the same native StoreKit purchase flow
+Note: The gear icon is always visible in the top-right corner regardless of which screen the web app is showing.
+
+NATIVE iOS FEATURES:
+
+1. Native Speech Recognition
+   - Tap the microphone icon in the chat screen
+   - Uses iOS SFSpeechRecognizer (not web-based speech)
+   - Speaks in real time with live transcription
+   - Requires microphone and speech recognition permissions
+
+2. Apple HealthKit Integration
+   - App reads steps, active calories, resting calories, heart rate, sleep analysis, and body weight from Apple Health
+   - Data displayed on the Health dashboard within the chat
+   - Requires HealthKit permission (system dialog presented on first use)
+
+3. StoreKit 2 In-App Purchase
+   - Premium subscription uses native Apple In-App Purchase (StoreKit 2)
+   - Product ID: com.mentiumlabs.sadiky.premium.yearly.v2
+   - Yearly auto-renewable subscription with 7-day free trial
+   - Accessible via the native gear icon (⚙) in the top-right corner → "Subscribe to Sadiky Premium"
+   - Also accessible via "Get Premium" prompts within the web app
+
+4. Push Notifications
+   - Medication, meal, hydration, and gym reminders via UNUserNotificationCenter
+   - Scheduled as local notifications with calendar and interval triggers
+   - Permission requested when user enables reminders
+
+5. Sign in with Apple
+   - Available on the login screen as a native ASAuthorizationController flow
+   - Uses ASAuthorizationAppleIDProvider for authentication
+
+6. Native Haptic Feedback
+   - All interactive buttons use UIImpactFeedbackGenerator
+   - Provides tactile feedback throughout the app
+
+7. Native Onboarding (first launch)
+   - 3-screen UIKit onboarding with SF Symbols
+   - Introduces HealthKit, voice input, and notification features
+   - Only shown once (tracked via UserDefaults)
+
+8. Native Settings Screen
+   - Accessible via the native gear icon (⚙) always visible in the top-right corner
+   - Subscribe to Sadiky Premium (direct StoreKit 2 purchase)
+   - Manage Subscription (opens Apple subscription management)
+   - Restore Purchases (calls AppStore.sync())
+   - Links to Privacy Policy, Terms of Use, and Sources
 
 Key screens to review:
-1. Consent overlay (first launch) — data sharing disclosure
+1. Native onboarding (first launch) — 3 screens with "Get Started"
 2. Login page — Sign in with Apple, Google, or Demo Account
-3. Chat — AI health assistant conversation
-4. Meals tab — Meal photo analysis with nutrition breakdown
-5. History tab — Medication adherence tracking
-6. Settings — Profile, schedule, data export, and account deletion
+3. Chat — AI health assistant with native voice input (mic icon)
+4. Health dashboard — HealthKit data display
+5. Meals tab — Meal photo analysis with nutrition breakdown
+6. Native Settings (gear icon ⚙ top-right) — Premium subscription, manage subscription, restore purchases, legal links
 
 Account deletion is available in Settings > "Delete my account permanently".
-
-Native Features: Sign in with Apple, haptic feedback on all interactions, native status bar and keyboard management, offline connectivity detection with retry UI, voice input via microphone, meal photo capture via camera, app lifecycle management.
 
 Sadiky provides general wellness information only and is not a substitute for professional medical advice. Medical disclaimers and source citations are displayed throughout the app.

@@ -17,3 +17,9 @@ Your health data is yours. We use third-party AI service providers to power the 
 
 MEDICAL DISCLAIMER:
 Sadiky is a wellness companion, not a medical device. It does not provide medical advice, diagnosis, or treatment. All health recommendations include citations from reputable sources (WHO, NIH, USDA, Mayo Clinic). Always consult a qualified healthcare provider before making any medical or health decisions. Information provided is for general wellness purposes only.
+
+SUBSCRIPTION INFORMATION:
+Sadiky Premium is available as a yearly auto-renewable subscription at $19.99/year with a 7-day free trial. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel subscriptions in your Account Settings on the App Store.
+
+Terms of Use: https://sadiky.com/terms.html
+Privacy Policy: https://sadiky.com/privacy

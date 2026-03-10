@@ -6,7 +6,6 @@ const config: CapacitorConfig = {
   webDir: 'www',
   appendUserAgent: 'Capacitor Sadiky',
   server: {
-    url: 'https://sadiky.com/',
     cleartext: false,
     allowNavigation: [
       'sadiky.com',
@@ -38,7 +37,7 @@ const config: CapacitorConfig = {
       overlaysWebView: false
     },
     Keyboard: {
-      resize: 'body',
+      resize: 'native',
       resizeOnFullScreen: true
     }
   }

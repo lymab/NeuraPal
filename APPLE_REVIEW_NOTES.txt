@@ -1,5 +1,5 @@
 App Name: Sadiky
-Version: 1.3 (Build 7)
+Version: 2.0 (Build 2)
 Bundle ID: com.mentiumlabs.sadiky
 
 SIGN-IN CREDENTIALS (for App Store Connect review):
@@ -17,12 +17,24 @@ analyze meals via photos, monitor daily health metrics from Apple Health, and ma
 wellness routines through conversational AI. Designed for all ages including elderly
 users — large buttons, voice-first interaction, no typing required.
 
+HOW TO TEST IN-APP PURCHASE (iPad and iPhone):
+1. Open the app → complete the 3-screen onboarding → tap "Get Started"
+2. Sign in using Demo Account (tap "Try Demo Account" on the login screen)
+3. Tap the gear icon (⚙) in the top-right corner of the screen — this is a
+   native floating button always visible on every screen
+4. Tap "Subscribe to Sadiky Premium" (first row, under "Premium" section)
+5. The native StoreKit purchase sheet appears — complete the sandbox purchase
+6. Alternative: After signing in, the web app may also show a "Get Premium"
+   banner; tapping it triggers the same native StoreKit purchase flow
+Note: The gear icon is always visible in the top-right corner regardless of
+which screen the web app is showing. No web navigation is needed.
+
 SUBSCRIPTION:
 - Product: Sadiky Premium Yearly ($19.99/year)
 - Product ID: com.mentiumlabs.sadiky.premium.yearly.v2
 - Free trial: 7 days
 - All purchases go through Apple In-App Purchase (StoreKit 2)
-- Restore Purchases button is available on the subscription page
+- Restore Purchases button is available in native Settings
 - Manage Subscription opens iOS native subscription management
 - Auto-renewal and cancellation terms are displayed before purchase
 
@@ -33,9 +45,12 @@ NATIVE FEATURES (beyond WebView):
 2. Apple HealthKit Integration — Reads steps, calories, heart rate, sleep, and weight
    from Apple Health (read-only, no write access). Visible on the dashboard.
 3. StoreKit 2 In-App Purchase — Native subscription handling with Apple IAP.
+   Accessible via native gear icon (⚙) → "Subscribe to Sadiky Premium".
 4. Sign in with Apple — Redirect-based web authentication with JWT signature
    verification against Apple's JWKS.
 5. Haptic Feedback — Native haptics on UI interactions.
+6. Native Settings Screen — Always accessible via the floating gear icon (⚙)
+   in the top-right corner. No web dependency needed.
 
 HOW TO TEST VOICE:
 1. Open the app and sign in (or use Demo mode)
@@ -52,7 +67,7 @@ HOW TO TEST MEAL PHOTO:
 
 HOW TO TEST ACCOUNT DELETION:
 1. Sign in with any method
-2. Go to Settings (gear icon)
+2. Tap the gear icon (⚙) in the top-right corner
 3. Scroll to Account section
 4. Tap "Delete Account"
 5. Confirm deletion — all server-side data is permanently removed
