@@ -3,8 +3,8 @@ Version: 2.0 (Build 2)
 Bundle ID: com.mentiumlabs.sadiky
 
 SIGN-IN CREDENTIALS (for App Store Connect review):
-  Email:    reviewer@apple.com
-  Password: Reviewer123
+  Username: Lyazmab
+  Password: Mabtest123@@
 
 ALTERNATIVE ACCESS:
   - Tap "Try a Demo" on the login screen for instant access without an account
