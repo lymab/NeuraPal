@@ -639,6 +639,63 @@ class ViewController: CAPBridgeViewController {
     })();
     """
 
+    /// JavaScript snippet injected on every page to ensure subscription compliance
+    /// links (Terms, Privacy, EULA) are available to the web layer even if the
+    /// remote page doesn't render them.  Exposes a global helper the paywall can call.
+    private static let complianceLinksJS = """
+    (function() {
+        if (window.__complianceLinksReady) return;
+        window.__complianceLinksReady = true;
+
+        window.__complianceURLs = {
+            terms:   'https://sadiky.com/terms.html',
+            privacy: 'https://sadiky.com/privacy.html',
+            eula:    'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'
+        };
+
+        window.__openComplianceLink = function(type) {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iapBridge) {
+                var action = 'open' + type.charAt(0).toUpperCase() + type.slice(1);
+                window.webkit.messageHandlers.iapBridge.postMessage({ action: action });
+            } else {
+                var url = window.__complianceURLs[type];
+                if (url) window.open(url, '_blank');
+            }
+        };
+
+        // Inject compliance footer on subscription / paywall pages
+        function injectComplianceFooter() {
+            if (document.getElementById('sadiky-compliance-footer')) return;
+            // Only inject on pages that contain IAP-related elements
+            var paywallEl = document.querySelector('[data-paywall], .paywall, .subscription-page, .premium-page, #paywall, #subscription');
+            if (!paywallEl) return;
+
+            var footer = document.createElement('div');
+            footer.id = 'sadiky-compliance-footer';
+            footer.style.cssText = 'text-align:center;padding:12px 16px 20px;font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;';
+            footer.innerHTML =
+                'Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. ' +
+                'Payment will be charged to your Apple ID account. ' +
+                'Manage subscriptions in your device Settings.<br>' +
+                '<a href="#" onclick="__openComplianceLink(\\'terms\\');return false;" style="color:#3B82F6;text-decoration:underline;">Terms of Use</a>' +
+                ' · ' +
+                '<a href="#" onclick="__openComplianceLink(\\'privacy\\');return false;" style="color:#3B82F6;text-decoration:underline;">Privacy Policy</a>' +
+                ' · ' +
+                '<a href="#" onclick="__openComplianceLink(\\'eula\\');return false;" style="color:#3B82F6;text-decoration:underline;">EULA</a>';
+            paywallEl.appendChild(footer);
+        }
+
+        // Run on load and observe DOM changes for SPA navigations
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(injectComplianceFooter, 500);
+        } else {
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(injectComplianceFooter, 500); });
+        }
+        var _compObs = new MutationObserver(function() { setTimeout(injectComplianceFooter, 300); });
+        _compObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+    })();
+    """
+
     // MARK: Lifecycle
 
     override func capacitorDidLoad() {
@@ -676,6 +733,9 @@ class ViewController: CAPBridgeViewController {
         // Inject speech polyfill on every page load
         injectSpeechPolyfill()
 
+        // Inject compliance links for App Store Guidelines 3.1.2(c)
+        injectComplianceLinks()
+
         startBrandingTimer()
 
         // Permissions are now deferred to point-of-use:
@@ -696,11 +756,17 @@ class ViewController: CAPBridgeViewController {
         )
     }
 
+    private func injectComplianceLinks() {
+        webView?.evaluateJavaScript(ViewController.complianceLinksJS) { _, _ in }
+    }
+
     @objc private func onNavigation() {
         // Re-inject after a short delay to let the new page initialise
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             let js = Self.speechPolyfillJS
             self?.webView?.evaluateJavaScript(js) { _, _ in }
+            // Re-inject compliance links on SPA navigation
+            self?.webView?.evaluateJavaScript(Self.complianceLinksJS) { _, _ in }
         }
     }
 

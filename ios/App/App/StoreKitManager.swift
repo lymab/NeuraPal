@@ -17,6 +17,11 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
     // Legacy product ID — needed to honor existing subscribers' entitlements
     private static let legacyProductID = "com.mentiumlabs.sadiky.premium.yearly"
     private static let serverBaseURL = "https://sadiky.com"
+
+    // Compliance URLs required by App Store Guidelines 3.1.2(c)
+    private static let termsURL = "https://sadiky.com/terms.html"
+    private static let privacyURL = "https://sadiky.com/privacy.html"
+    private static let eulaURL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
     private var products: [Product] = []
     private var updateListenerTask: Task<Void, Error>?
     private static let log = Logger(subsystem: "com.mentiumlabs.sadiky", category: "IAP")
@@ -48,6 +53,12 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
             Task { await checkEntitlement() }
         case "manageSubscription":
             Task { await openManageSubscriptions() }
+        case "openTerms":
+            openURL(Self.termsURL)
+        case "openPrivacy":
+            openURL(Self.privacyURL)
+        case "openEULA":
+            openURL(Self.eulaURL)
         default:
             break
         }
@@ -105,7 +116,7 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
         }
 
         let json = """
-        {"id":"\(product.id)","title":"\(escapeJS(product.displayName))","description":"\(escapeJS(product.description))","price":"\(product.displayPrice)","hasTrialOffer":\(hasTrialOffer),"trialDays":\(trialDays),"periodUnit":"\(periodUnit)"}
+        {"id":"\(product.id)","title":"\(escapeJS(product.displayName))","description":"\(escapeJS(product.description))","price":"\(product.displayPrice)","hasTrialOffer":\(hasTrialOffer),"trialDays":\(trialDays),"periodUnit":"\(periodUnit)","termsURL":"\(Self.termsURL)","privacyURL":"\(Self.privacyURL)","eulaURL":"\(Self.eulaURL)"}
         """
         sendToJS("if(window.__iapProducts)window.__iapProducts(\(json));")
     }
@@ -279,6 +290,15 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
             throw error
         case .verified(let safe):
             return safe
+        }
+    }
+
+    // MARK: - Open URL
+
+    private func openURL(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url)
         }
     }
 
