@@ -394,6 +394,114 @@ class GoogleAuthBridgeHandler: NSObject, WKScriptMessageHandler, ASWebAuthentica
     }
 }
 
+// MARK: - Apple Sign-In Bridge (Native ASAuthorizationAppleIDProvider)
+
+class AppleSignInBridgeHandler: NSObject, WKScriptMessageHandler,
+    ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+
+    weak var webView: WKWebView?
+
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return webView?.window ?? UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first ?? ASPresentationAnchor()
+    }
+
+    func userContentController(_ ucc: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard let body = message.body as? [String: Any],
+              let action = body["action"] as? String,
+              action == "startAppleAuth" else { return }
+        startAppleSignIn()
+    }
+
+    private func startAppleSignIn() {
+        let provider = ASAuthorizationAppleIDProvider()
+        let request = provider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
+
+    // Success
+    func authorizationController(controller: ASAuthorizationController,
+                                 didCompleteWithAuthorization authorization: ASAuthorization) {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let identityTokenData = credential.identityToken,
+              let identityToken = String(data: identityTokenData, encoding: .utf8) else {
+            sendError("no_token")
+            return
+        }
+
+        let authCode = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+        let email = credential.email ?? ""
+        let firstName = credential.fullName?.givenName ?? ""
+        let lastName = credential.fullName?.familyName ?? ""
+
+        Task { await exchangeWithServer(identityToken: identityToken, authCode: authCode,
+                                         email: email, firstName: firstName, lastName: lastName) }
+    }
+
+    // Failure / cancel
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        let code = (error as? ASAuthorizationError)?.code
+        let msg = code == .canceled ? "cancelled" : "error"
+        sendError(msg)
+    }
+
+    private func exchangeWithServer(identityToken: String, authCode: String,
+                                     email: String, firstName: String, lastName: String) async {
+        guard let url = URL(string: "https://sadiky.com/api/apple-native-auth.php") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 15
+
+        let body: [String: String] = [
+            "identityToken": identityToken,
+            "authorizationCode": authCode,
+            "email": email,
+            "firstName": firstName,
+            "lastName": lastName
+        ]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard statusCode >= 200 && statusCode < 300,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let token = json["token"] as? String else {
+                sendError("server_error")
+                return
+            }
+            await MainActor.run {
+                if let loginURL = URL(string: "https://sadiky.com/api/token-login.php?token=" + token) {
+                    webView?.load(URLRequest(url: loginURL))
+                }
+            }
+        } catch {
+            sendError("network_error")
+        }
+    }
+
+    private func sendError(_ msg: String) {
+        let safe = safeJSString(msg)
+        DispatchQueue.main.async { [weak self] in
+            self?.webView?.evaluateJavaScript(
+                "if(window.__appleAuthError)window.__appleAuthError(\(safe));"
+            ) { _, _ in }
+        }
+    }
+
+    private func safeJSString(_ s: String) -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: s, options: .fragmentsAllowed),
+              let json = String(data: data, encoding: .utf8) else { return "\"\"" }
+        return json
+    }
+}
+
 // MARK: - Notification Bridge
 // Receives messages from the web's SadikyNotifications module and schedules
 // local notifications via UNUserNotificationCenter.
@@ -494,6 +602,7 @@ class ViewController: CAPBridgeViewController {
     private let speechHandler = SpeechBridgeHandler()
     private let healthHandler = HealthKitBridgeHandler()
     private let googleAuthHandler = GoogleAuthBridgeHandler()
+    private let appleAuthHandler = AppleSignInBridgeHandler()
     private let notificationHandler = NotificationBridgeHandler()
     private var storeKitManager: Any?  // StoreKitManager (iOS 15+, typed as Any for compilation)
 
@@ -666,9 +775,8 @@ class ViewController: CAPBridgeViewController {
         // Inject compliance footer on subscription / paywall pages
         function injectComplianceFooter() {
             if (document.getElementById('sadiky-compliance-footer')) return;
-            // Only inject on pages that contain IAP-related elements
-            var paywallEl = document.querySelector('[data-paywall], .paywall, .subscription-page, .premium-page, #paywall, #subscription');
-            if (!paywallEl) return;
+            // Try broad set of selectors for the paywall container
+            var paywallEl = document.querySelector('[data-paywall], .paywall, .subscription-page, .premium-page, #paywall, #subscription, .pricing, .plans, .upgrade, [data-premium], [data-subscription]');
 
             var footer = document.createElement('div');
             footer.id = 'sadiky-compliance-footer';
@@ -682,6 +790,8 @@ class ViewController: CAPBridgeViewController {
                 '<a href="#" onclick="__openComplianceLink(\\'privacy\\');return false;" style="color:#3B82F6;text-decoration:underline;">Privacy Policy</a>' +
                 ' · ' +
                 '<a href="#" onclick="__openComplianceLink(\\'eula\\');return false;" style="color:#3B82F6;text-decoration:underline;">EULA</a>';
+
+            if (!paywallEl) return;
             paywallEl.appendChild(footer);
         }
 
@@ -693,6 +803,24 @@ class ViewController: CAPBridgeViewController {
         }
         var _compObs = new MutationObserver(function() { setTimeout(injectComplianceFooter, 300); });
         _compObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+    })();
+    """
+
+    /// JavaScript injected on every page to intercept web-based Apple sign-in
+    /// clicks and route them through the native ASAuthorizationController bridge.
+    private static let appleSignInInterceptJS = """
+    (function() {
+        if (window.__appleSignInBridgeReady) return;
+        window.__appleSignInBridgeReady = true;
+        document.addEventListener('click', function(e) {
+            var el = e.target.closest('a[href*="apple_login"], a[href*="apple-login"], button[class*="apple"], .apple-signin, .apple-login, [data-apple-signin], [onclick*="apple_login"], [onclick*="appleLogin"]');
+            if (!el) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.appleAuthBridge) {
+                window.webkit.messageHandlers.appleAuthBridge.postMessage({ action: 'startAppleAuth' });
+            }
+        }, true);
     })();
     """
 
@@ -716,6 +844,11 @@ class ViewController: CAPBridgeViewController {
         webView?.configuration.userContentController
             .add(googleAuthHandler, name: "googleAuthBridge")
 
+        // Wire Apple Sign-In bridge
+        appleAuthHandler.webView = webView
+        webView?.configuration.userContentController
+            .add(appleAuthHandler, name: "appleAuthBridge")
+
         // Wire Notification bridge
         notificationHandler.webView = webView
         webView?.configuration.userContentController
@@ -736,7 +869,21 @@ class ViewController: CAPBridgeViewController {
         // Inject compliance links for App Store Guidelines 3.1.2(c)
         injectComplianceLinks()
 
+        // Inject Apple Sign-In intercept to route web clicks to native bridge
+        injectAppleSignInIntercept()
+
         startBrandingTimer()
+
+        // Re-check entitlement after webview is ready so the web layer
+        // receives __iapStatus on launch (the init() check fires before
+        // webView is assigned, so its callback goes to nil).
+        if #available(iOS 15.0, *) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                if let skm = self?.storeKitManager as? StoreKitManager {
+                    Task { await skm.checkEntitlement() }
+                }
+            }
+        }
 
         // Permissions are now deferred to point-of-use:
         // - Speech/Mic: requested when user first taps the mic (SpeechBridgeHandler.startRecognition)
@@ -760,6 +907,10 @@ class ViewController: CAPBridgeViewController {
         webView?.evaluateJavaScript(ViewController.complianceLinksJS) { _, _ in }
     }
 
+    private func injectAppleSignInIntercept() {
+        webView?.evaluateJavaScript(ViewController.appleSignInInterceptJS) { _, _ in }
+    }
+
     @objc private func onNavigation() {
         // Re-inject after a short delay to let the new page initialise
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
@@ -767,6 +918,8 @@ class ViewController: CAPBridgeViewController {
             self?.webView?.evaluateJavaScript(js) { _, _ in }
             // Re-inject compliance links on SPA navigation
             self?.webView?.evaluateJavaScript(Self.complianceLinksJS) { _, _ in }
+            // Re-inject Apple Sign-In intercept on SPA navigation
+            self?.webView?.evaluateJavaScript(Self.appleSignInInterceptJS) { _, _ in }
         }
     }
 
@@ -791,6 +944,7 @@ class ViewController: CAPBridgeViewController {
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "healthBridge")
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "iapBridge")
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "googleAuthBridge")
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "appleAuthBridge")
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "notificationBridge")
     }
 }

@@ -1,5 +1,5 @@
 App Name: Sadiky
-Version: 2.0 (Build 2)
+Version: 2.0 (Build 7)
 Bundle ID: com.mentiumlabs.sadiky
 
 SIGN-IN CREDENTIALS (for App Store Connect review):
@@ -33,8 +33,8 @@ NATIVE FEATURES (beyond WebView):
 2. Apple HealthKit Integration — Reads steps, calories, heart rate, sleep, and weight
    from Apple Health (read-only, no write access). Visible on the dashboard.
 3. StoreKit 2 In-App Purchase — Native subscription handling with Apple IAP.
-4. Sign in with Apple — Redirect-based web authentication with JWT signature
-   verification against Apple's JWKS.
+4. Sign in with Apple — Native ASAuthorizationAppleIDProvider integration.
+   Credentials verified server-side against Apple's JWKS.
 5. Haptic Feedback — Native haptics on UI interactions.
 
 HOW TO TEST VOICE:

@@ -1,6 +1,6 @@
-# NeuraPal iOS App
+# Sadiky iOS App
 
-Capacitor wrapper for the NeuraPal PWA — builds a native iOS app that loads the live web app.
+Capacitor wrapper for the Sadiky PWA — builds a native iOS app that loads the live web app.
 
 ## Project Structure
 - `www/` — Web shell that redirects to the live PWA

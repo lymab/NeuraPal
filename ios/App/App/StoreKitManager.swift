@@ -29,7 +29,10 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
     override init() {
         super.init()
         updateListenerTask = listenForTransactions()
-        Task { await loadProducts() }
+        Task {
+            await loadProducts()
+            await checkEntitlement()
+        }
     }
 
     deinit {
@@ -105,7 +108,9 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
 
         // Extract subscription period
         var periodUnit = ""
+        var periodValue = 1
         if let sub = product.subscription {
+            periodValue = sub.subscriptionPeriod.value
             switch sub.subscriptionPeriod.unit {
             case .day:   periodUnit = "day"
             case .week:  periodUnit = "week"
@@ -116,9 +121,27 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
         }
 
         let json = """
-        {"id":"\(product.id)","title":"\(escapeJS(product.displayName))","description":"\(escapeJS(product.description))","price":"\(product.displayPrice)","hasTrialOffer":\(hasTrialOffer),"trialDays":\(trialDays),"periodUnit":"\(periodUnit)","termsURL":"\(Self.termsURL)","privacyURL":"\(Self.privacyURL)","eulaURL":"\(Self.eulaURL)"}
+        {"id":"\(product.id)","title":"\(escapeJS(product.displayName))","description":"\(escapeJS(product.description))","price":"\(product.displayPrice)","hasTrialOffer":\(hasTrialOffer),"trialDays":\(trialDays),"periodUnit":"\(periodUnit)","periodValue":\(periodValue),"termsURL":"\(Self.termsURL)","privacyURL":"\(Self.privacyURL)","eulaURL":"\(Self.eulaURL)"}
         """
         sendToJS("if(window.__iapProducts)window.__iapProducts(\(json));")
+
+        // Inject compliance footer directly when products are sent — guarantees
+        // the auto-renewal disclosure and Terms/Privacy/EULA links appear on the paywall.
+        let complianceJS = """
+        (function(){
+            if(document.getElementById('sadiky-compliance-footer'))return;
+            if(!window.__openComplianceLink){window.__openComplianceLink=function(type){if(window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.iapBridge){var action='open'+type.charAt(0).toUpperCase()+type.slice(1);window.webkit.messageHandlers.iapBridge.postMessage({action:action});}};};
+            var container = document.querySelector('[data-paywall], .paywall, .subscription-page, .premium-page, #paywall, #subscription, .pricing, .plans, .upgrade, [data-premium], [data-subscription]');
+            if(!container) container = document.body;
+            if(!container) return;
+            var f = document.createElement('div');
+            f.id = 'sadiky-compliance-footer';
+            f.style.cssText = 'text-align:center;padding:12px 16px 20px;font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;';
+            f.innerHTML = 'Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Payment will be charged to your Apple ID account. Manage subscriptions in your device Settings.<br><a href="#" onclick="__openComplianceLink(\\'terms\\');return false;" style="color:#3B82F6;text-decoration:underline;">Terms of Use</a> · <a href="#" onclick="__openComplianceLink(\\'privacy\\');return false;" style="color:#3B82F6;text-decoration:underline;">Privacy Policy</a> · <a href="#" onclick="__openComplianceLink(\\'eula\\');return false;" style="color:#3B82F6;text-decoration:underline;">EULA</a>';
+            container.appendChild(f);
+        })();
+        """
+        sendToJS(complianceJS)
     }
 
     // MARK: - Purchase
