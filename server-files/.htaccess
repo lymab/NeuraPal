@@ -1,0 +1,4 @@
+# Privacy and Terms URL redirects (clean URLs)
+RewriteEngine On
+RewriteRule ^privacy$ privacy.php [L]
+RewriteRule ^terms$ terms.php [L]

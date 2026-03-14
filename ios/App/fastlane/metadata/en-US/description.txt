@@ -1,0 +1,25 @@
+Sadiky — Your AI Health Butler
+
+Stay on top of your health routine with Sadiky, your personal AI-powered wellness assistant. Track medications, analyze meals, plan your day, and build healthier habits — all through a simple chat interface.
+
+CORE FEATURES:
+- AI Health Assistant — Chat naturally to manage your entire health routine
+- Medication Tracking — Add supplements and medications with smart timing reminders
+- Meal Analysis — Snap a photo of your meal for instant nutrition breakdown
+- Daily Planning — Get personalized daily schedules based on your routine
+- Water Tracking — Monitor your daily hydration goals
+- Smart Reminders — Never miss a medication, meal, or gym session
+- Voice Input — Talk to Sadiky using your voice
+- Adherence History — Track your medication compliance over time
+
+PRIVACY FIRST:
+Your health data is yours. We use third-party AI service providers to power the AI assistant — you'll be asked for explicit consent before any data is shared. We never sell your data or use it for advertising. Delete your account anytime to remove all data.
+
+MEDICAL DISCLAIMER:
+Sadiky is a wellness companion, not a medical device. It does not provide medical advice, diagnosis, or treatment. All health recommendations include citations from reputable sources (WHO, NIH, USDA, Mayo Clinic). Always consult a qualified healthcare provider before making any medical or health decisions. Information provided is for general wellness purposes only.
+
+SUBSCRIPTION INFORMATION:
+Sadiky Premium is available as a yearly auto-renewable subscription at $19.99/year with a 7-day free trial. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel subscriptions in your Account Settings on the App Store.
+
+Terms of Use: https://sadiky.com/terms.html
+Privacy Policy: https://sadiky.com/privacy

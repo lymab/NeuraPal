@@ -597,14 +597,19 @@ class NotificationBridgeHandler: NSObject, WKScriptMessageHandler {
 
 // MARK: - Main View Controller
 
-class ViewController: CAPBridgeViewController {
+class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
 
     private let speechHandler = SpeechBridgeHandler()
     private let healthHandler = HealthKitBridgeHandler()
     private let googleAuthHandler = GoogleAuthBridgeHandler()
     private let appleAuthHandler = AppleSignInBridgeHandler()
     private let notificationHandler = NotificationBridgeHandler()
+    private let settingsHandler = SettingsBridgeHandler()
     private var storeKitManager: Any?  // StoreKitManager (iOS 15+, typed as Any for compilation)
+    private var hasLoadedRemoteURL = false
+    private var settingsButton: UIButton?
+
+    var settingsWebView: WKWebView? { webView }
 
     // MARK: Branding
 
@@ -824,7 +829,63 @@ class ViewController: CAPBridgeViewController {
     })();
     """
 
+    /// Hides "Skip for now" / "Maybe later" buttons in HealthKit permission contexts (Guideline 5.1.1(iv))
+    private static let enforceHealthPermissionJS = """
+    (function(){
+        new MutationObserver(function(){
+            document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
+                var t=(el.textContent||'').toLowerCase().trim();
+                if((t==='skip for now'||t==='skip'||t==='maybe later')&&
+                   el.closest('[class*="health"],[class*="permission"],[data-modal*="health"]')){
+                    el.style.display='none';
+                }
+            });
+        }).observe(document.body||document.documentElement,{childList:true,subtree:true});
+    })();
+    """
+
+    /// Scrolls focused inputs into view when keyboard appears (Guideline 4 — keyboard fix)
+    private static let keyboardFixJS = """
+    (function(){
+        window.addEventListener('keyboardWillShow',function(){
+            var f=document.activeElement;
+            if(f&&(f.tagName==='INPUT'||f.tagName==='TEXTAREA')){
+                setTimeout(function(){f.scrollIntoView({behavior:'smooth',block:'center'});},300);
+            }
+        });
+    })();
+    """
+
     // MARK: Lifecycle
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        if !OnboardingViewController.hasCompletedOnboarding {
+            presentOnboarding()
+        } else if !hasLoadedRemoteURL {
+            loadRemoteApp()
+        }
+    }
+
+    private func presentOnboarding() {
+        let onboarding = OnboardingViewController()
+        onboarding.modalPresentationStyle = .fullScreen
+        onboarding.onComplete = { [weak self] in
+            self?.dismiss(animated: true) {
+                self?.loadRemoteApp()
+            }
+        }
+        present(onboarding, animated: false)
+    }
+
+    private func loadRemoteApp() {
+        guard !hasLoadedRemoteURL else { return }
+        hasLoadedRemoteURL = true
+        if let url = URL(string: "https://sadiky.com/") {
+            webView?.load(URLRequest(url: url))
+        }
+    }
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
@@ -863,6 +924,14 @@ class ViewController: CAPBridgeViewController {
             storeKitManager = skm
         }
 
+        // Wire Settings bridge
+        settingsHandler.viewController = self
+        webView?.configuration.userContentController
+            .add(settingsHandler, name: "settingsBridge")
+
+        // Keyboard dismiss on scroll (Guideline 4)
+        webView?.scrollView.keyboardDismissMode = .interactive
+
         // Inject speech polyfill on every page load
         injectSpeechPolyfill()
 
@@ -872,7 +941,26 @@ class ViewController: CAPBridgeViewController {
         // Inject Apple Sign-In intercept to route web clicks to native bridge
         injectAppleSignInIntercept()
 
+        // Inject HealthKit skip-button enforcement (Guideline 5.1.1(iv))
+        let healthScript = WKUserScript(
+            source: Self.enforceHealthPermissionJS,
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        webView?.configuration.userContentController.addUserScript(healthScript)
+
+        // Inject keyboard scroll-into-view fix (Guideline 4)
+        let keyboardScript = WKUserScript(
+            source: Self.keyboardFixJS,
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        webView?.configuration.userContentController.addUserScript(keyboardScript)
+
         startBrandingTimer()
+
+        // Add native floating gear button for Settings access (Guideline 2.1(b))
+        addSettingsButton()
 
         // Re-check entitlement after webview is ready so the web layer
         // receives __iapStatus on launch (the init() check fires before
@@ -884,10 +972,34 @@ class ViewController: CAPBridgeViewController {
                 }
             }
         }
+    }
 
-        // Permissions are now deferred to point-of-use:
-        // - Speech/Mic: requested when user first taps the mic (SpeechBridgeHandler.startRecognition)
-        // - HealthKit: requested when web first calls healthBridge with "getToday" or "requestPermission"
+    private func addSettingsButton() {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        button.setImage(UIImage(systemName: "gearshape.fill", withConfiguration: config), for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        button.layer.cornerRadius = 22
+        button.clipsToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(openSettingsFromButton), for: .touchUpInside)
+        view.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 44),
+            button.heightAnchor.constraint(equalToConstant: 44),
+            button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -12),
+        ])
+        settingsButton = button
+    }
+
+    @objc private func openSettingsFromButton() {
+        let settingsVC = SettingsViewController()
+        settingsVC.webView = webView
+        let nav = UINavigationController(rootViewController: settingsVC)
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
     }
 
     private func injectSpeechPolyfill() {
@@ -946,5 +1058,6 @@ class ViewController: CAPBridgeViewController {
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "googleAuthBridge")
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "appleAuthBridge")
         webView?.configuration.userContentController.removeScriptMessageHandler(forName: "notificationBridge")
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "settingsBridge")
     }
 }
