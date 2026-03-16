@@ -402,9 +402,16 @@ class AppleSignInBridgeHandler: NSObject, WKScriptMessageHandler,
     weak var webView: WKWebView?
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return webView?.window ?? UIApplication.shared.connectedScenes
-            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
-            .first ?? ASPresentationAnchor()
+        if let window = webView?.window { return window }
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .filter({ $0.activationState == .foregroundActive })
+            .first?.keyWindow { return window }
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow }) { return window }
+        return ASPresentationAnchor()
     }
 
     func userContentController(_ ucc: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -477,6 +484,7 @@ class AppleSignInBridgeHandler: NSObject, WKScriptMessageHandler,
                 return
             }
             await MainActor.run {
+                webView?.evaluateJavaScript("window.__appleAuthPending = false;") { _, _ in }
                 if let loginURL = URL(string: "https://sadiky.com/api/token-login.php?token=" + token) {
                     webView?.load(URLRequest(url: loginURL))
                 }
@@ -815,8 +823,6 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
     /// clicks and route them through the native ASAuthorizationController bridge.
     private static let appleSignInInterceptJS = """
     (function() {
-        if (window.__appleSignInBridgeReady) return;
-        window.__appleSignInBridgeReady = true;
         document.addEventListener('click', function(e) {
             var el = e.target.closest('a[href*="apple_login"], a[href*="apple-login"], button[class*="apple"], .apple-signin, .apple-login, [data-apple-signin], [onclick*="apple_login"], [onclick*="appleLogin"]');
             if (!el) return;
@@ -939,7 +945,12 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
         injectComplianceLinks()
 
         // Inject Apple Sign-In intercept to route web clicks to native bridge
-        injectAppleSignInIntercept()
+        let appleScript = WKUserScript(
+            source: Self.appleSignInInterceptJS,
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        webView?.configuration.userContentController.addUserScript(appleScript)
 
         // Inject HealthKit skip-button enforcement (Guideline 5.1.1(iv))
         let healthScript = WKUserScript(
@@ -1019,10 +1030,6 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
         webView?.evaluateJavaScript(ViewController.complianceLinksJS) { _, _ in }
     }
 
-    private func injectAppleSignInIntercept() {
-        webView?.evaluateJavaScript(ViewController.appleSignInInterceptJS) { _, _ in }
-    }
-
     @objc private func onNavigation() {
         // Re-inject after a short delay to let the new page initialise
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
@@ -1030,8 +1037,6 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
             self?.webView?.evaluateJavaScript(js) { _, _ in }
             // Re-inject compliance links on SPA navigation
             self?.webView?.evaluateJavaScript(Self.complianceLinksJS) { _, _ in }
-            // Re-inject Apple Sign-In intercept on SPA navigation
-            self?.webView?.evaluateJavaScript(Self.appleSignInInterceptJS) { _, _ in }
         }
     }
 
