@@ -15,6 +15,7 @@
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		AB1234560000000000000001 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1234560000000000000002 /* ViewController.swift */; };
 		AB12345600000000000000A2 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12345600000000000000A1 /* StoreKitManager.swift */; };
+		00556D76AD2C0C66FD41C0DE /* NativeSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FB05C40C9A0A1BFE20EFEF /* NativeSubscriptionView.swift */; };
 		AB12345600000000000000C2 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12345600000000000000C1 /* OnboardingViewController.swift */; };
 		AB12345600000000000000D2 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12345600000000000000D1 /* SettingsViewController.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
@@ -32,6 +33,7 @@
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AB1234560000000000000002 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AB12345600000000000000A1 /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
+		B3FB05C40C9A0A1BFE20EFEF /* NativeSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSubscriptionView.swift; sourceTree = "<group>"; };
 		AB12345600000000000000C1 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		AB12345600000000000000D1 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				AB1234560000000000000002 /* ViewController.swift */,
 				AB12345600000000000000A1 /* StoreKitManager.swift */,
+				B3FB05C40C9A0A1BFE20EFEF /* NativeSubscriptionView.swift */,
 				AB12345600000000000000C1 /* OnboardingViewController.swift */,
 				AB12345600000000000000D1 /* SettingsViewController.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -179,6 +182,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				AB1234560000000000000001 /* ViewController.swift in Sources */,
 				AB12345600000000000000A2 /* StoreKitManager.swift in Sources */,
+				00556D76AD2C0C66FD41C0DE /* NativeSubscriptionView.swift in Sources */,
 				AB12345600000000000000C2 /* OnboardingViewController.swift in Sources */,
 				AB12345600000000000000D2 /* SettingsViewController.swift in Sources */,
 			);
@@ -321,7 +325,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -343,7 +347,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (

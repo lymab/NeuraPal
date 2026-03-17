@@ -862,6 +862,16 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
     })();
     """
 
+    /// Intercepts subscribe.php page loads and triggers the native SubscriptionStoreView
+    /// via the iapBridge, ensuring Apple's Guideline 3.1.2(c) compliance.
+    private static let subscribeInterceptJS = """
+    (function(){
+        if(window.location.pathname.indexOf('/subscribe') === -1) return;
+        if(!window.webkit||!window.webkit.messageHandlers||!window.webkit.messageHandlers.iapBridge) return;
+        window.webkit.messageHandlers.iapBridge.postMessage({action:'showNativeSubscription'});
+    })();
+    """
+
     // MARK: Lifecycle
 
     override func viewDidAppear(_ animated: Bool) {
@@ -925,6 +935,7 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
         if #available(iOS 15.0, *) {
             let skm = StoreKitManager()
             skm.webView = webView
+            skm.viewController = self
             webView?.configuration.userContentController
                 .add(skm, name: "iapBridge")
             storeKitManager = skm
@@ -967,6 +978,14 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
             forMainFrameOnly: true
         )
         webView?.configuration.userContentController.addUserScript(keyboardScript)
+
+        // Intercept subscribe.php to present native SubscriptionStoreView (Guideline 3.1.2(c))
+        let subscribeInterceptScript = WKUserScript(
+            source: Self.subscribeInterceptJS,
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        webView?.configuration.userContentController.addUserScript(subscribeInterceptScript)
 
         startBrandingTimer()
 

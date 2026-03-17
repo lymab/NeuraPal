@@ -1,4 +1,5 @@
 import StoreKit
+import SwiftUI
 import UIKit
 import WebKit
 import os.log
@@ -12,6 +13,7 @@ import os.log
 class StoreKitManager: NSObject, WKScriptMessageHandler {
 
     weak var webView: WKWebView?
+    weak var viewController: UIViewController?
 
     private static let productID = "com.mentiumlabs.sadiky.premium.yearly.v2"
     // Legacy product ID — needed to honor existing subscribers' entitlements
@@ -49,7 +51,15 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
         case "getProducts":
             Task { await sendProductInfo() }
         case "purchase":
-            Task { await purchase() }
+            if #available(iOS 17.0, *) {
+                presentSubscriptionStore()
+            } else {
+                Task { await purchase() }
+            }
+        case "showNativeSubscription":
+            if #available(iOS 17.0, *) {
+                presentSubscriptionStore()
+            }
         case "restore":
             Task { await restore() }
         case "checkStatus":
@@ -217,7 +227,7 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
         var isActive = false
         var expiryDate: Date?
 
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             if case .verified(let transaction) = result,
                (transaction.productID == Self.productID || transaction.productID == Self.legacyProductID) {
                 if transaction.revocationDate == nil {
@@ -237,7 +247,7 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
 
     private func listenForTransactions() -> Task<Void, Error> {
         Task.detached { [weak self] in
-            for await result in Transaction.updates {
+            for await result in StoreKit.Transaction.updates {
                 if case .verified(let transaction) = result {
                     await transaction.finish()
                     await self?.syncWithServer(transaction: transaction)
@@ -249,7 +259,7 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
 
     // MARK: - Server Sync
 
-    private func syncWithServer(transaction: Transaction) async {
+    private func syncWithServer(transaction: StoreKit.Transaction) async {
         guard let url = URL(string: "\(Self.serverBaseURL)/api/apple-iap-verify.php") else { return }
 
         var request = URLRequest(url: url)
@@ -281,7 +291,7 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
             "expirationDate": transaction.expirationDate.map { ISO8601DateFormatter().string(from: $0) } ?? "",
             "environment": {
                 if #available(iOS 16.0, *) {
-                    return transaction.environment == .sandbox ? "sandbox" : "production"
+                    return transaction.environment == .production ? "production" : "sandbox"
                 }
                 return "unknown"
             }()
@@ -313,6 +323,43 @@ class StoreKitManager: NSObject, WKScriptMessageHandler {
             throw error
         case .verified(let safe):
             return safe
+        }
+    }
+
+    // MARK: - Native Subscription Store (iOS 17+)
+
+    @available(iOS 17.0, *)
+    private func presentSubscriptionStore() {
+        DispatchQueue.main.async { [weak self] in
+            guard let vc = self?.viewController else { return }
+            if vc.presentedViewController != nil { return }
+
+            let subView = NativeSubscriptionView {
+                // Purchase succeeded — sync entitlement and navigate to dashboard
+                Task { [weak self] in
+                    await self?.checkEntitlement()
+                    await self?.syncLatestTransaction()
+                }
+                DispatchQueue.main.async { [weak self] in
+                    self?.webView?.evaluateJavaScript(
+                        "window.location.href='/dashboard.php';"
+                    ) { _, _ in }
+                }
+            }
+
+            let host = UIHostingController(rootView: subView)
+            host.modalPresentationStyle = .pageSheet
+            vc.present(host, animated: true)
+        }
+    }
+
+    private func syncLatestTransaction() async {
+        for await result in StoreKit.Transaction.currentEntitlements {
+            if case .verified(let transaction) = result,
+               (transaction.productID == Self.productID || transaction.productID == Self.legacyProductID) {
+                await syncWithServer(transaction: transaction)
+                break
+            }
         }
     }
 
