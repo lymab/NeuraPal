@@ -50,15 +50,19 @@ workflows:
           # Replace Automatic with Manual everywhere
           sed -i '' 's/ProvisioningStyle = Automatic/ProvisioningStyle = Manual/g' "$PBXPROJ"
           sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' "$PBXPROJ"
-          # Add signing settings and entitlements to EVERY build configuration that has PRODUCT_BUNDLE_IDENTIFIER
-          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.sadiky;/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.sadiky;\n\t\t\t\tDEVELOPMENT_TEAM = $TEAM_ID;\n\t\t\t\tCODE_SIGN_IDENTITY = \"iPhone Distribution\";\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";\n\t\t\t\tCODE_SIGN_ENTITLEMENTS = App/App.entitlements;/g" "$PBXPROJ"
+          # Add signing settings only if not already committed inline (idempotent)
+          if ! grep -q "PROVISIONING_PROFILE_SPECIFIER" "$PBXPROJ"; then
+            sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.sadiky;/PRODUCT_BUNDLE_IDENTIFIER = com.mentiumlabs.sadiky;\n\t\t\t\tDEVELOPMENT_TEAM = $TEAM_ID;\n\t\t\t\tCODE_SIGN_IDENTITY = \"iPhone Distribution\";\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";\n\t\t\t\tCODE_SIGN_ENTITLEMENTS = App/App.entitlements;/g" "$PBXPROJ"
+          fi
           echo "=== Verify signing in pbxproj ==="
           grep -B2 -A8 "PRODUCT_BUNDLE_IDENTIFIER" "$PBXPROJ"
       - name: Set build version
         script: |
           cd ios/App
-          agvtool new-version -all 1
-          agvtool new-marketing-version 2.0
+          # Marketing version lives in the pbxproj (MARKETING_VERSION) — do not override here.
+          # Build number = latest TestFlight build + 1 so uploads never collide.
+          LATEST=$(app-store-connect get-latest-testflight-build-number "6759394632" 2>/dev/null || echo 0)
+          agvtool new-version -all $((LATEST + 1))
       - name: Archive
         script: |
           xcodebuild \
