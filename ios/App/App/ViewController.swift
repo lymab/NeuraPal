@@ -898,6 +898,9 @@ class ViewController: CAPBridgeViewController, SettingsWebViewProvider {
     private func loadRemoteApp() {
         guard !hasLoadedRemoteURL else { return }
         hasLoadedRemoteURL = true
+        // Capacitor already loads server.url at startup; force-loading again would
+        // cancel that navigation (-999) and flash the errorPath offline page.
+        if webView?.url?.host?.hasSuffix("sadiky.com") == true { return }
         if let url = URL(string: "https://sadiky.com/") {
             webView?.load(URLRequest(url: url))
         }

@@ -6,6 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'www',
   appendUserAgent: 'Capacitor Sadiky',
   server: {
+    // Remote-first: the app loads sadiky.com directly. errorPath falls back
+    // to the local www/index.html offline/retry page when the load fails.
+    url: 'https://sadiky.com',
+    errorPath: 'index.html',
     cleartext: false,
     allowNavigation: [
       'sadiky.com',
@@ -37,7 +41,7 @@ const config: CapacitorConfig = {
       overlaysWebView: false
     },
     Keyboard: {
-      resize: 'native',
+      resize: 'body',
       resizeOnFullScreen: true
     }
   }
