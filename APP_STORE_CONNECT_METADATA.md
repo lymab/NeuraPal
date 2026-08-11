@@ -108,7 +108,7 @@ Your AI Health Butler
 If Apple asks about the business model, reply with:
 
 ```
-Thank you for your review. Sadiky is currently a free app with all features available at no cost. We plan to introduce an optional premium subscription (Sadiky Pro) in a future update, which will be handled exclusively through Apple's In-App Purchase system. The current version does not include any paid features or subscriptions.
+Thank you for your review. Sadiky is free to download and use. It offers one optional auto-renewable subscription — Sadiky Premium Yearly ($19.99/year with a 7-day free trial, product ID com.mentiumlabs.sadiky.premium.yearly.v2) — handled exclusively through Apple's In-App Purchase system (StoreKit 2). There are no external purchase links or payment mechanisms.
 ```
 
 ---

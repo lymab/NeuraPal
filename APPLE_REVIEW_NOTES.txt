@@ -1,10 +1,10 @@
 App Name: Sadiky
-Version: 2.0 (Build 14)
+Version: 2.2
 Bundle ID: com.mentiumlabs.sadiky
 
 SIGN-IN CREDENTIALS (for App Store Connect review):
-  Username: Lyazmab
-  Password: Mabtest123@@
+  Provided in the App Review Information section of App Store Connect
+  (do not commit credentials to this file)
 
 ALTERNATIVE ACCESS:
   - Tap "Try a Demo" on the login screen for instant access without an account
