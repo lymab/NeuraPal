@@ -8,5 +8,10 @@
 	</array>
 	<key>com.apple.developer.healthkit</key>
 	<true/>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:sadiky.com</string>
+		<string>webcredentials:sadiky.com</string>
+	</array>
 </dict>
 </plist>
