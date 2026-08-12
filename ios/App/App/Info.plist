@@ -67,5 +67,7 @@
 	<false/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Sadiky reads Apple Health data (steps, calories, heart rate, sleep, weight) to display your daily wellness summary in the app.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Sadiky does not currently write to Apple Health. This permission is declared because the app links the HealthKit framework; no data is saved to Health without your explicit consent.</string>
 </dict>
 </plist>
